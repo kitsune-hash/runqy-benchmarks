@@ -1,0 +1,89 @@
+{
+  "metadata": {
+    "date": "2026-02-08",
+    "machine": "Ubuntu Linux, AMD Ryzen / Intel Core (local dev machine)",
+    "description": "Job submission (enqueue) throughput benchmark. Measures time to submit jobs to the queue, not processing time.",
+    "methodology": "Concurrent HTTP/Redis submissions, measuring round-trip latency from client to queue"
+  },
+  "results": {
+    "1k_jobs": {
+      "runqy": {
+        "throughput_per_second": 867.40,
+        "latency_p50_ms": 9.91,
+        "latency_p95_ms": 18.02,
+        "latency_p99_ms": 22.12,
+        "errors": 0
+      },
+      "celery": {
+        "throughput_per_second": 1049.28,
+        "latency_p50_ms": 5.82,
+        "latency_p95_ms": 15.93,
+        "latency_p99_ms": 81.61,
+        "errors": 0
+      },
+      "bullmq": {
+        "throughput_per_second": 9803.92,
+        "latency_p50_ms": 0.64,
+        "latency_p95_ms": 1.10,
+        "latency_p99_ms": 24.47,
+        "errors": 0
+      }
+    },
+    "10k_jobs": {
+      "runqy": {
+        "throughput_per_second": 888.22,
+        "latency_p50_ms": 48.20,
+        "latency_p95_ms": 91.37,
+        "latency_p99_ms": 112.80,
+        "errors": 0
+      },
+      "celery": {
+        "throughput_per_second": 1072.98,
+        "latency_p50_ms": 16.79,
+        "latency_p95_ms": 155.51,
+        "latency_p99_ms": 260.80,
+        "errors": 0
+      },
+      "bullmq": {
+        "throughput_per_second": 16977.93,
+        "latency_p50_ms": 2.23,
+        "latency_p95_ms": 4.58,
+        "latency_p99_ms": 6.60,
+        "errors": 0
+      }
+    },
+    "50k_jobs": {
+      "runqy": {
+        "throughput_per_second": 824.26,
+        "latency_p50_ms": 103.56,
+        "latency_p95_ms": 196.31,
+        "latency_p99_ms": 251.15,
+        "errors": 0
+      },
+      "celery": {
+        "throughput_per_second": 1088.35,
+        "latency_p50_ms": 16.52,
+        "latency_p95_ms": 332.57,
+        "latency_p99_ms": 564.93,
+        "errors": 0
+      },
+      "bullmq": {
+        "throughput_per_second": 24177.95,
+        "latency_p50_ms": 3.19,
+        "latency_p95_ms": 6.76,
+        "latency_p99_ms": 9.34,
+        "errors": 0
+      }
+    }
+  },
+  "analysis": {
+    "notes": [
+      "BullMQ uses native Redis pipelines which explains its high throughput",
+      "Celery shows consistent throughput but high P99 latency under load",
+      "Runqy uses HTTP API which adds overhead but provides better latency consistency",
+      "These benchmarks measure enqueue speed, not job processing speed",
+      "Runqy's value proposition is worker deployment flexibility, not raw enqueue speed"
+    ],
+    "context": "Runqy is designed for distributed GPU/ML workloads where job processing time (minutes) dominates enqueue time (milliseconds). The HTTP-based architecture enables features like remote worker bootstrapping that direct Redis queues cannot provide."
+  }
+}

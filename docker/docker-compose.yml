@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  # Shared Redis for all queue systems
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly no --save ""
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ============================================
+  # RUNQY
+  # ============================================
+  runqy-server:
+    image: golang:1.24-alpine
+    working_dir: /app
+    volumes:
+      - ./runqy:/app
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - RUNQY_API_KEY=benchmark-key
+    command: sh -c "go build -o server ./cmd/server && ./server"
+    ports:
+      - "3000:3000"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  runqy-worker:
+    image: golang:1.24-alpine
+    working_dir: /app
+    volumes:
+      - ./runqy-worker:/app
+      - ./workers/runqy:/workers
+    environment:
+      - RUNQY_SERVER_URL=http://runqy-server:3000
+      - RUNQY_API_KEY=benchmark-key
+      - RUNQY_QUEUE=benchmark
+    command: sh -c "go build -o worker . && ./worker"
+    depends_on:
+      - runqy-server
+
+  # ============================================
+  # CELERY (Python)
+  # ============================================
+  celery-worker:
+    build:
+      context: ./celery
+      dockerfile: Dockerfile
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+    command: celery -A tasks worker --loglevel=warning --concurrency=1
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  # ============================================
+  # BULLMQ (Node.js)
+  # ============================================
+  bullmq-worker:
+    build:
+      context: ./bullmq
+      dockerfile: Dockerfile
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    command: node worker.js
+    depends_on:
+      redis:
+        condition: service_healthy
+
+networks:
+  default:
+    name: runqy-benchmark

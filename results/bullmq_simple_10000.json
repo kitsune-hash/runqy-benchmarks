@@ -1,0 +1,15 @@
+{
+  "system": "BullMQ",
+  "scenario": "simple",
+  "jobs_count": 10000,
+  "duration_seconds": 0.589,
+  "throughput_per_second": 16977.93,
+  "latency_p50_ms": 2.235,
+  "latency_p95_ms": 4.578,
+  "latency_p99_ms": 6.596,
+  "latency_avg_ms": 2.625,
+  "latency_min_ms": 1.472,
+  "latency_max_ms": 30.438,
+  "errors": 0,
+  "timestamp": "2026-02-08T20:13:15.141Z"
+}

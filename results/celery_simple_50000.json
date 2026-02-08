@@ -1,0 +1,15 @@
+{
+  "system": "Celery",
+  "scenario": "simple",
+  "jobs_count": 50000,
+  "duration_seconds": 45.941,
+  "throughput_per_second": 1088.35,
+  "latency_p50_ms": 16.515,
+  "latency_p95_ms": 332.572,
+  "latency_p99_ms": 564.933,
+  "latency_avg_ms": 88.651,
+  "latency_min_ms": 0.579,
+  "latency_max_ms": 1730.295,
+  "errors": 0,
+  "timestamp": "2026-02-08T20:15:10.309101Z"
+}

@@ -1,0 +1,15 @@
+{
+  "system": "Runqy",
+  "scenario": "simple",
+  "jobs_count": 10000,
+  "duration_seconds": 11.258,
+  "throughput_per_second": 888.22,
+  "latency_p50_ms": 48.2,
+  "latency_p95_ms": 91.37,
+  "latency_p99_ms": 112.803,
+  "latency_avg_ms": 50.844,
+  "latency_min_ms": 2.518,
+  "latency_max_ms": 182.237,
+  "errors": 0,
+  "timestamp": "2026-02-08T20:13:04.782623Z"
+}
