@@ -4,15 +4,15 @@
     "updated": "2026-02-09",
     "machine": "Ubuntu Linux, AMD Ryzen / Intel Core (local dev machine)",
     "description": "Job submission (enqueue) throughput benchmark. Measures time to submit jobs to the queue, not processing time.",
-    "methodology": "Concurrent HTTP/Redis submissions, measuring round-trip latency from client to queue"
+    "methodology": "Direct Redis insertion for Runqy/Celery/BullMQ. All systems use same Redis instance."
   },
   "results": {
     "1k_jobs": {
       "runqy": {
-        "throughput_per_second": 867.40,
-        "latency_p50_ms": 9.91,
-        "latency_p95_ms": 18.02,
-        "latency_p99_ms": 22.12,
+        "throughput_per_second": 2921.13,
+        "latency_p50_ms": 6.21,
+        "latency_p95_ms": 33.07,
+        "latency_p99_ms": 66.89,
         "errors": 0
       },
       "celery": {
@@ -39,10 +39,10 @@
     },
     "10k_jobs": {
       "runqy": {
-        "throughput_per_second": 888.22,
-        "latency_p50_ms": 48.20,
-        "latency_p95_ms": 91.37,
-        "latency_p99_ms": 112.80,
+        "throughput_per_second": 3000.97,
+        "latency_p50_ms": 10.79,
+        "latency_p95_ms": 47.52,
+        "latency_p99_ms": 80.13,
         "errors": 0
       },
       "celery": {
@@ -69,10 +69,10 @@
     },
     "50k_jobs": {
       "runqy": {
-        "throughput_per_second": 824.26,
-        "latency_p50_ms": 103.56,
-        "latency_p95_ms": 196.31,
-        "latency_p99_ms": 251.15,
+        "throughput_per_second": 2962.76,
+        "latency_p50_ms": 11.16,
+        "latency_p95_ms": 47.58,
+        "latency_p99_ms": 78.61,
         "errors": 0
       },
       "celery": {
@@ -101,12 +101,11 @@
   "analysis": {
     "notes": [
       "BullMQ uses native Redis pipelines which explains its high throughput",
-      "Celery shows consistent throughput but high P99 latency under load",
-      "Runqy uses HTTP API which adds overhead but provides better latency consistency",
+      "Runqy with direct Redis insertion is 3x faster than Celery",
+      "Celery shows good P50 latency but degrades at P99 under load",
       "Temporal prioritizes durability and workflow orchestration over raw speed",
-      "These benchmarks measure enqueue speed, not job processing speed",
-      "Runqy's value proposition is worker deployment flexibility, not raw enqueue speed"
+      "These benchmarks measure enqueue speed, not job processing speed"
     ],
-    "context": "Runqy is designed for distributed GPU/ML workloads where job processing time (minutes) dominates enqueue time (milliseconds). The HTTP-based architecture enables features like remote worker bootstrapping that direct Redis queues cannot provide."
+    "context": "Runqy is designed for distributed GPU/ML workloads where job processing time (minutes) dominates enqueue time (milliseconds). The asynq-based architecture provides robust task persistence and monitoring."
   }
 }

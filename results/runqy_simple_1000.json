@@ -1,15 +1,10 @@
 {
-  "system": "Runqy",
-  "scenario": "simple",
-  "jobs_count": 1000,
-  "duration_seconds": 1.153,
-  "throughput_per_second": 867.4,
-  "latency_p50_ms": 9.906,
-  "latency_p95_ms": 18.017,
-  "latency_p99_ms": 22.124,
-  "latency_avg_ms": 10.229,
-  "latency_min_ms": 1.983,
-  "latency_max_ms": 27.267,
-  "errors": 0,
-  "timestamp": "2026-02-08T20:12:26.052576Z"
+  "system": "runqy",
+  "job_count": 1000,
+  "total_time_seconds": 0.34233335906174034,
+  "throughput_per_second": 2921.1292838675663,
+  "latency_p50_ms": 6.210737046785653,
+  "latency_p95_ms": 33.066891017369926,
+  "latency_p99_ms": 66.88831502106041,
+  "errors": 0
 }
