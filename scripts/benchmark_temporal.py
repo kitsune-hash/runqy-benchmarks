@@ -6,25 +6,37 @@ Measures workflow submission throughput and latency.
 import asyncio
 import json
 import time
-import statistics
-import sys
+import uuid
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, asdict
+from datetime import timedelta
 
-# Add parent to path for imports
-sys.path.insert(0, str(Path(__file__).parent))
-from benchmark_common import BenchmarkResult, save_results
+from temporalio import activity, workflow
+from temporalio.client import Client
+from temporalio.worker import Worker
 
-try:
-    from temporalio.client import Client
-except ImportError:
-    print("temporalio not installed. Run: pip install temporalio")
-    sys.exit(1)
+
+@activity.defn
+async def simple_task(payload: str) -> str:
+    """Minimal task - just return the payload."""
+    return f"processed: {payload}"
+
+
+@workflow.defn
+class SimpleWorkflow:
+    """Simple workflow that runs one activity."""
+    
+    @workflow.run
+    async def run(self, payload: str) -> str:
+        return await workflow.execute_activity(
+            simple_task,
+            payload,
+            start_to_close_timeout=timedelta(seconds=60),
+        )
 
 
 @dataclass
-class TemporalBenchmarkResult:
+class BenchmarkResult:
     """Result of a Temporal benchmark run."""
     system: str = "temporal"
     job_count: int = 0
@@ -41,9 +53,9 @@ async def submit_workflow(client: Client, payload: str) -> tuple[float, bool]:
     start = time.perf_counter()
     try:
         handle = await client.start_workflow(
-            "SimpleWorkflow",
+            SimpleWorkflow.run,
             payload,
-            id=f"bench-{time.time_ns()}",
+            id=f"bench-{uuid.uuid4()}",
             task_queue="benchmark-queue",
         )
         latency = (time.perf_counter() - start) * 1000  # ms
@@ -54,25 +66,22 @@ async def submit_workflow(client: Client, payload: str) -> tuple[float, bool]:
 
 
 async def run_benchmark(
-    host: str = "localhost",
-    port: int = 7233,
+    client: Client,
     job_count: int = 1000,
-    concurrency: int = 10,
-) -> TemporalBenchmarkResult:
+    concurrency: int = 50,
+) -> BenchmarkResult:
     """Run the Temporal benchmark."""
     print(f"\n{'='*50}")
     print(f"Temporal Benchmark: {job_count} workflows")
     print(f"{'='*50}")
-    
-    # Connect to Temporal
-    client = await Client.connect(f"{host}:{port}")
     
     latencies: list[float] = []
     errors = 0
     
     # Warmup
     print("Warming up...")
-    for i in range(min(100, job_count // 10)):
+    warmup_count = min(50, job_count // 20)
+    for i in range(warmup_count):
         await submit_workflow(client, f"warmup-{i}")
     
     print(f"Running benchmark with concurrency={concurrency}...")
@@ -105,7 +114,7 @@ async def run_benchmark(
         p95_idx = int(len(latencies) * 0.95)
         p99_idx = int(len(latencies) * 0.99)
         
-        result = TemporalBenchmarkResult(
+        result = BenchmarkResult(
             job_count=job_count,
             total_time_seconds=total_time,
             throughput_per_second=job_count / total_time,
@@ -115,7 +124,7 @@ async def run_benchmark(
             errors=errors,
         )
     else:
-        result = TemporalBenchmarkResult(job_count=job_count, errors=errors)
+        result = BenchmarkResult(job_count=job_count, errors=errors)
     
     print(f"\nResults:")
     print(f"  Throughput: {result.throughput_per_second:.2f} workflows/s")
@@ -127,26 +136,74 @@ async def run_benchmark(
     return result
 
 
+async def run_worker(client: Client, stop_event: asyncio.Event):
+    """Run the Temporal worker until stop_event is set."""
+    worker = Worker(
+        client,
+        task_queue="benchmark-queue",
+        workflows=[SimpleWorkflow],
+        activities=[simple_task],
+    )
+    
+    async def worker_task():
+        await worker.run()
+    
+    task = asyncio.create_task(worker_task())
+    await stop_event.wait()
+    task.cancel()
+    try:
+        await task
+    except asyncio.CancelledError:
+        pass
+
+
 async def main():
     """Run benchmarks for different job counts."""
     results_dir = Path(__file__).parent.parent / "results"
     results_dir.mkdir(exist_ok=True)
     
-    job_counts = [1000, 10000, 50000]
+    # Connect to Temporal
+    print("Connecting to Temporal server...")
+    client = await Client.connect("localhost:7233")
     
-    for count in job_counts:
-        result = await run_benchmark(
-            host="localhost",
-            port=7233,
-            job_count=count,
-            concurrency=50,
-        )
-        
-        # Save individual result
-        output_file = results_dir / f"temporal_simple_{count}.json"
-        with open(output_file, "w") as f:
-            json.dump(asdict(result), f, indent=2)
-        print(f"Saved: {output_file}")
+    # Start worker in background
+    stop_event = asyncio.Event()
+    worker_task = asyncio.create_task(run_worker(client, stop_event))
+    
+    # Wait for worker to be ready
+    await asyncio.sleep(2)
+    
+    job_counts = [1000, 10000, 50000]
+    all_results = {}
+    
+    try:
+        for count in job_counts:
+            result = await run_benchmark(
+                client,
+                job_count=count,
+                concurrency=50,
+            )
+            
+            # Save individual result
+            output_file = results_dir / f"temporal_simple_{count}.json"
+            with open(output_file, "w") as f:
+                json.dump(asdict(result), f, indent=2)
+            print(f"Saved: {output_file}")
+            
+            all_results[f"{count}_jobs"] = asdict(result)
+            
+            # Brief pause between tests
+            await asyncio.sleep(2)
+    finally:
+        # Stop worker
+        stop_event.set()
+        await worker_task
+    
+    print("\n" + "="*50)
+    print("All benchmarks complete!")
+    print("="*50)
+    
+    return all_results
 
 
 if __name__ == "__main__":

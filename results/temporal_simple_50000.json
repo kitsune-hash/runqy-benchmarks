@@ -1,10 +1,10 @@
 {
   "system": "temporal",
   "job_count": 50000,
-  "throughput_per_second": 142.67,
-  "latency_p50_ms": 6.92,
-  "latency_p95_ms": 15.83,
-  "latency_p99_ms": 28.45,
-  "errors": 0,
-  "note": "Estimated based on Temporal public benchmarks."
+  "total_time_seconds": 208.21233975200448,
+  "throughput_per_second": 240.1394656030162,
+  "latency_p50_ms": 196.7066350625828,
+  "latency_p95_ms": 293.05177100468427,
+  "latency_p99_ms": 338.7977209640667,
+  "errors": 0
 }

@@ -4,10 +4,7 @@
     "updated": "2026-02-09",
     "machine": "Ubuntu Linux, AMD Ryzen / Intel Core (local dev machine)",
     "description": "Job submission (enqueue) throughput benchmark. Measures time to submit jobs to the queue, not processing time.",
-    "methodology": "Concurrent HTTP/Redis submissions, measuring round-trip latency from client to queue",
-    "notes": {
-      "temporal": "Temporal values are estimates based on public benchmarks. Temporal is a workflow orchestrator with durability guarantees, not a simple message queue."
-    }
+    "methodology": "Concurrent HTTP/Redis submissions, measuring round-trip latency from client to queue"
   },
   "results": {
     "1k_jobs": {
@@ -33,12 +30,11 @@
         "errors": 0
       },
       "temporal": {
-        "throughput_per_second": 187.42,
-        "latency_p50_ms": 4.21,
-        "latency_p95_ms": 8.93,
-        "latency_p99_ms": 15.67,
-        "errors": 0,
-        "estimated": true
+        "throughput_per_second": 329.95,
+        "latency_p50_ms": 146.32,
+        "latency_p95_ms": 184.87,
+        "latency_p99_ms": 201.69,
+        "errors": 0
       }
     },
     "10k_jobs": {
@@ -64,12 +60,11 @@
         "errors": 0
       },
       "temporal": {
-        "throughput_per_second": 156.89,
-        "latency_p50_ms": 5.84,
-        "latency_p95_ms": 12.47,
-        "latency_p99_ms": 22.31,
-        "errors": 0,
-        "estimated": true
+        "throughput_per_second": 277.71,
+        "latency_p50_ms": 182.89,
+        "latency_p95_ms": 223.56,
+        "latency_p99_ms": 245.34,
+        "errors": 0
       }
     },
     "50k_jobs": {
@@ -95,12 +90,11 @@
         "errors": 0
       },
       "temporal": {
-        "throughput_per_second": 142.67,
-        "latency_p50_ms": 6.92,
-        "latency_p95_ms": 15.83,
-        "latency_p99_ms": 28.45,
-        "errors": 0,
-        "estimated": true
+        "throughput_per_second": 240.14,
+        "latency_p50_ms": 196.71,
+        "latency_p95_ms": 293.05,
+        "latency_p99_ms": 338.80,
+        "errors": 0
       }
     }
   },
