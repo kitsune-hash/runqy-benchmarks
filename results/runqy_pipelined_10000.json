@@ -1,0 +1,11 @@
+{
+  "system": "runqy",
+  "job_count": 10000,
+  "total_time_seconds": 0.23376915999688208,
+  "throughput_per_second": 42777.242302335246,
+  "latency_p50_ms": 0.023346709785982966,
+  "latency_p95_ms": 0.02565481001511216,
+  "latency_p99_ms": 0.05044206976890564,
+  "errors": 0,
+  "optimization": "pipelined"
+}
