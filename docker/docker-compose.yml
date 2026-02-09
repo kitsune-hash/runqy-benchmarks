@@ -76,6 +76,34 @@ services:
       redis:
         condition: service_healthy
 
+  # ============================================
+  # TEMPORAL
+  # ============================================
+  temporal:
+    image: temporalio/auto-setup:latest
+    ports:
+      - "7233:7233"
+      - "8080:8080"
+    environment:
+      - DB=sqlite
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml
+    healthcheck:
+      test: ["CMD", "tctl", "--address", "temporal:7233", "cluster", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  temporal-worker:
+    build:
+      context: ./temporal
+      dockerfile: Dockerfile
+    environment:
+      - TEMPORAL_HOST=temporal
+      - TEMPORAL_PORT=7233
+    depends_on:
+      temporal:
+        condition: service_healthy
+
 networks:
   default:
     name: runqy-benchmark

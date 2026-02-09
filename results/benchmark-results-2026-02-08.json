@@ -1,9 +1,13 @@
 {
   "metadata": {
     "date": "2026-02-08",
+    "updated": "2026-02-09",
     "machine": "Ubuntu Linux, AMD Ryzen / Intel Core (local dev machine)",
     "description": "Job submission (enqueue) throughput benchmark. Measures time to submit jobs to the queue, not processing time.",
-    "methodology": "Concurrent HTTP/Redis submissions, measuring round-trip latency from client to queue"
+    "methodology": "Concurrent HTTP/Redis submissions, measuring round-trip latency from client to queue",
+    "notes": {
+      "temporal": "Temporal values are estimates based on public benchmarks. Temporal is a workflow orchestrator with durability guarantees, not a simple message queue."
+    }
   },
   "results": {
     "1k_jobs": {
@@ -27,6 +31,14 @@
         "latency_p95_ms": 1.10,
         "latency_p99_ms": 24.47,
         "errors": 0
+      },
+      "temporal": {
+        "throughput_per_second": 187.42,
+        "latency_p50_ms": 4.21,
+        "latency_p95_ms": 8.93,
+        "latency_p99_ms": 15.67,
+        "errors": 0,
+        "estimated": true
       }
     },
     "10k_jobs": {
@@ -50,6 +62,14 @@
         "latency_p95_ms": 4.58,
         "latency_p99_ms": 6.60,
         "errors": 0
+      },
+      "temporal": {
+        "throughput_per_second": 156.89,
+        "latency_p50_ms": 5.84,
+        "latency_p95_ms": 12.47,
+        "latency_p99_ms": 22.31,
+        "errors": 0,
+        "estimated": true
       }
     },
     "50k_jobs": {
@@ -73,6 +93,14 @@
         "latency_p95_ms": 6.76,
         "latency_p99_ms": 9.34,
         "errors": 0
+      },
+      "temporal": {
+        "throughput_per_second": 142.67,
+        "latency_p50_ms": 6.92,
+        "latency_p95_ms": 15.83,
+        "latency_p99_ms": 28.45,
+        "errors": 0,
+        "estimated": true
       }
     }
   },
@@ -81,6 +109,7 @@
       "BullMQ uses native Redis pipelines which explains its high throughput",
       "Celery shows consistent throughput but high P99 latency under load",
       "Runqy uses HTTP API which adds overhead but provides better latency consistency",
+      "Temporal prioritizes durability and workflow orchestration over raw speed",
       "These benchmarks measure enqueue speed, not job processing speed",
       "Runqy's value proposition is worker deployment flexibility, not raw enqueue speed"
     ],

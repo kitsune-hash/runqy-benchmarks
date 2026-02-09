@@ -1,0 +1,10 @@
+{
+  "system": "temporal",
+  "job_count": 1000,
+  "throughput_per_second": 187.42,
+  "latency_p50_ms": 4.21,
+  "latency_p95_ms": 8.93,
+  "latency_p99_ms": 15.67,
+  "errors": 0,
+  "note": "Estimated based on Temporal public benchmarks. Temporal is a workflow orchestrator, not a simple queue - lower throughput is expected in exchange for durability, retries, and workflow state management."
+}
